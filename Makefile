@@ -12,3 +12,9 @@ publish:
 
 package-install:
 	python3 -m pip install dist/*.whl
+
+package-uninstall:
+	python3 -m pip uninstall project2-perceva-m25-555 -y
+
+lint:
+	poetry run ruff check .
