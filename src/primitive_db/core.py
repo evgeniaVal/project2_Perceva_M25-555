@@ -1,3 +1,6 @@
+from .utils import load_table_data, save_table_data
+
+
 def create_table(metadata: dict, table_name: str, columns: dict) -> dict:
     """Создает новую таблицу в метаданных.
 
@@ -55,3 +58,32 @@ def list_tables(metadata: dict) -> None:
             print(f"- {table_name}")
     else:
         print("Таблиц нет.")
+
+def insert(metadata, table_name, values):
+    if table_name not in metadata:
+        raise ValueError(f'Таблица "{table_name}" не существует.')
+    if len(values) != len(metadata[table_name]) - 1:
+        raise ValueError("Количество значений не соответствует количеству столбцов.")
+    expected = [v for k, v in metadata[table_name].items() if k != "ID"]
+    for exp_type, val in zip(expected, values):
+        if exp_type == "str" and not isinstance(val, str):
+            raise ValueError(f"Ожидалась строка, получено: {val}.")
+        if exp_type == "int" and not val.isdigit():
+            raise ValueError(f"Ожидалось целое число, получено: {val}.")
+        elif exp_type == "bool" and not isinstance(val, bool):
+            raise ValueError("Ожидалось булево значение (true/false),"
+                             f" получено: {val}.")
+    loaded_data = load_table_data(table_name)
+    new_id = max(loaded_data.keys(), default=0) + 1
+    loaded_data[new_id] = {col: val for col, val in zip(
+        (k for k in metadata[table_name].keys() if k != "ID"), values)}
+    save_table_data(table_name, loaded_data)
+    print(f"Запись успешно добавлена с ID {new_id}.")
+
+def select(table_data, where_clause=None):
+    results = []
+    for record_id, record in table_data.items():
+        if where_clause is None or all(record.get(col) == val for col, val 
+                                       in where_clause.items()):
+            results.append((record_id, record))
+    return results
