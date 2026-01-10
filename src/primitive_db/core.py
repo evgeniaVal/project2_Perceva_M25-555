@@ -18,10 +18,14 @@ def create_table(metadata: dict, table_name: str, columns: dict) -> dict:
         raise ValueError("Столбец с именем 'ID' зарезервирован и " \
         "добавляется автоматически.")
     if table_name in metadata:
-        raise ValueError(f"Таблица {table_name} уже существует.")
+        raise ValueError(f'Таблица "{table_name}" уже существует.')
     if not all(col_type in {'int', 'str', 'bool'} for col_type in columns.values()):
         raise ValueError("Недопустимый тип столбца. Допустимые типы: int, str, bool.")
-    return {**metadata, table_name: {"ID": "int", **columns}}
+    metadata_tmp = {**metadata, table_name: {"ID": "int", **columns}}
+    cols_str = ", ".join(f"{name}:{typ}" for name, typ in 
+                         metadata_tmp[table_name].items())
+    print(f'Таблица "{table_name}" успешно создана со столбцами: {cols_str}.')
+    return metadata_tmp
 
 def drop_table(metadata: dict, table_name: str) -> dict:
     """Удаляет таблицу из метаданных.
@@ -36,6 +40,16 @@ def drop_table(metadata: dict, table_name: str) -> dict:
         dict: Обновленные метаданные без удаленной таблицы.
     """
     if table_name not in metadata:
-        raise ValueError(f"Таблица {table_name} не существует.")
+        raise ValueError(f'Таблица "{table_name}" не существует.')
+    print(f'Таблица "{table_name}" успешно удалена.')
     return {k: v for k, v in metadata.items() if k != table_name}
     
+def list_tables(metadata: dict) -> None:
+    """Выводит список всех таблиц в метаданных.
+
+    Args:
+        metadata (dict): Метаданные всех таблиц.
+    """
+    if metadata:
+        for table_name in metadata.keys():
+            print(f"- {table_name}")

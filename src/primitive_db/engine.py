@@ -1,16 +1,46 @@
+import shlex
+
 import prompt
 
+from .core import create_table, drop_table, list_tables
+from .utils import load_metadata, save_metadata
 
-def cycle():
-    user_input = prompt.string("Введите команду: ")
-    print()
-    match user_input:
-        case "exit":
-            exit()
-        case "help":
-            help()
-        case _:
-            print("Неизвестная команда")
+
+def run():
+    print("***База данных***\n")
+    print_help()
+    app_over = False
+    if not load_metadata("db_meta.json"):
+        save_metadata("db_meta.json", {})
+    while not app_over:
+        metadata = load_metadata("db_meta.json")
+        try:
+            input_str = prompt.string(">>>Введите команду: ").strip() # type: ignore
+            args = shlex.split(input_str)
+            if not args:
+                continue
+        except (KeyboardInterrupt, EOFError):
+            args = ["exit"]
+        match args[0].lower():
+            case "create_table":
+                try:
+                    save_metadata("db_meta.json", create_table(metadata, args[1], 
+                                dict(arg.split(":") for arg in args[2:])))
+                except (ValueError,) as e:
+                    print(f"Ошибка: {e}")
+            case "list_tables":
+                list_tables(metadata)
+            case "drop_table":
+                try:
+                    save_metadata("db_meta.json", drop_table(metadata, *args[1:]))
+                except ValueError as e:
+                    print(f"Ошибка: {e}")
+            case "exit":
+                app_over = True
+            case "help":
+                print_help()
+            case _:
+                print(f"Функции {args[0]} нет. Попробуйте снова.")
 
 # src/primitive_db/engine.py
 def print_help():

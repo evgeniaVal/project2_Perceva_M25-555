@@ -1,11 +1,8 @@
-from .engine import cycle, print_help
+from .engine import run
 
 
 def main():
-    print("Первая попытка запустить проект!\n\n***")
-    print_help()
-    while True:
-        cycle()
+    run()
 
 
 if __name__ == "__main__":
