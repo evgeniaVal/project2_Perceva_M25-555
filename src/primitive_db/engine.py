@@ -46,7 +46,7 @@ def handle_command(cmd, args, metadata):
 
 def get_input(prompt_msg=">>>Введите команду: "):
     try:
-        input_str = prompt.string(prompt_msg).strip().lower() # type: ignore
+        input_str = prompt.string(prompt_msg).strip() # type: ignore
         cmd, args = parse_command(input_str)
     except (KeyboardInterrupt, EOFError):
         cmd, args = "exit", []
