@@ -1,10 +1,8 @@
-import shlex
-
 import prompt
 
 from .consts import META_LOCATION
 from .core import create_table, drop_table, list_tables
-from .parser import get_input, parse_pairs
+from .parser import parse_command, parse_pairs
 from .utils import load_metadata, save_metadata
 
 
@@ -45,6 +43,14 @@ def handle_command(cmd, args, metadata):
     except (ValueError,) as e:
         print(e)
     return app_over, metadata, sucess_
+
+def get_input(prompt_msg=">>>Введите команду: "):
+    try:
+        input_str = prompt.string(prompt_msg).strip().lower() # type: ignore
+        cmd, args = parse_command(input_str)
+    except (KeyboardInterrupt, EOFError):
+        cmd, args = "exit", []
+    return cmd, args
 
 def run():
     print("***База данных***\n")
