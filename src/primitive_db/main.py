@@ -1,9 +1,9 @@
-from .engine import cycle, help
+from .engine import cycle, print_help
 
 
 def main():
     print("Первая попытка запустить проект!\n\n***")
-    help()
+    print_help()
     while True:
         cycle()
 
