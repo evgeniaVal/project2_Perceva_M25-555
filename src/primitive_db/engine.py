@@ -50,7 +50,7 @@ def get_input(prompt_msg=">>>Введите команду: "):
         cmd, args = parse_command(input_str)
     except (KeyboardInterrupt, EOFError):
         cmd, args = "exit", []
-    return cmd, args
+    return cmd.lower(), args
 
 def run():
     print("***База данных***\n")

@@ -4,7 +4,7 @@ import shlex
 def parse_command(command_str):
     args = shlex.split(command_str)
     if not args:
-        return None, []
+        return "", []
     return args[0], args[1:]
 
 def parse_pairs(pairs):
