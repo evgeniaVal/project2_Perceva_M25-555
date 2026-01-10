@@ -6,9 +6,22 @@ from .parser import parse_command, parse_pairs
 from .utils import load_metadata, save_metadata
 
 
+def print_help():
+    """Prints the help message for the current mode."""
+   
+    print("\n***Процесс работы с таблицей***")
+    print("Функции:")
+    print("<command> create_table <имя_таблицы> <столбец1:тип> .. - создать таблицу")
+    print("<command> list_tables - показать список всех таблиц")
+    print("<command> drop_table <имя_таблицы> - удалить таблицу")
+    
+    print("\nОбщие команды:")
+    print("<command> exit - выход из программы")
+    print("<command> help - справочная информация\n")
+
 def handle_command(cmd, args, metadata):
     app_over = False
-    sucess_ = False
+    is_successful = False
     try:
         match cmd:
             case "create_table":
@@ -22,10 +35,10 @@ def handle_command(cmd, args, metadata):
                                      " Попробуйте снова.")
                 metadata = create_table(metadata, args[0], 
                     dict(arg.split(":") for arg in args[1:]))
-                sucess_ = True
+                is_successful = True
             case "list_tables":
                 if args:
-                    raise ValueError(f"Некорректное значение: {" ".join(args)}." 
+                    raise ValueError(f"Некорректное значение: {' '.join(args)}." 
                                      " Попробуйте снова.")
                 list_tables(metadata)
             case "drop_table":
@@ -33,7 +46,7 @@ def handle_command(cmd, args, metadata):
                     raise ValueError("Некорректное значение. Требуется указать одно"
                                      " имя таблицы. Попробуйте снова.")
                 metadata = drop_table(metadata, args[0])
-                sucess_ = True
+                is_successful = True
             case "exit":
                 app_over = True
             case "help":
@@ -42,7 +55,7 @@ def handle_command(cmd, args, metadata):
                 print(f"Функции {cmd} нет. Попробуйте снова.")
     except (ValueError,) as e:
         print(e)
-    return app_over, metadata, sucess_
+    return app_over, metadata, is_successful
 
 def get_input(prompt_msg=">>>Введите команду: "):
     try:
@@ -65,17 +78,3 @@ def run():
         if sucess_:
             save_metadata(META_LOCATION, metadata)
         
-
-# src/primitive_db/engine.py
-def print_help():
-    """Prints the help message for the current mode."""
-   
-    print("\n***Процесс работы с таблицей***")
-    print("Функции:")
-    print("<command> create_table <имя_таблицы> <столбец1:тип> .. - создать таблицу")
-    print("<command> list_tables - показать список всех таблиц")
-    print("<command> drop_table <имя_таблицы> - удалить таблицу")
-    
-    print("\nОбщие команды:")
-    print("<command> exit - выход из программы")
-    print("<command> help - справочная информация\n")

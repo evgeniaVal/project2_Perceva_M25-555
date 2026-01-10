@@ -1,4 +1,4 @@
-from .utils import load_table_data, save_table_data
+from .utils import load_table_data
 
 
 def create_table(metadata: dict, table_name: str, columns: dict) -> dict:
@@ -62,46 +62,80 @@ def list_tables(metadata: dict) -> None:
 def insert(metadata, table_name, values):
     if table_name not in metadata:
         raise ValueError(f'Таблица "{table_name}" не существует.')
-    if len(values) != len(metadata[table_name]) - 1:
+
+    schema = metadata[table_name]
+
+    columns = [(col, typ) for col, typ in schema.items() if col != "ID"]
+
+    if len(values) != len(columns):
         raise ValueError("Количество значений не соответствует количеству столбцов.")
-    expected = [v for k, v in metadata[table_name].items() if k != "ID"]
-    for exp_type, val in zip(expected, values):
-        if exp_type == "str" and not isinstance(val, str):
-            raise ValueError(f"Ожидалась строка, получено: {val}.")
-        if exp_type == "int" and not val.isdigit():
-            raise ValueError(f"Ожидалось целое число, получено: {val}.")
-        elif exp_type == "bool" and not isinstance(val, bool):
-            raise ValueError("Ожидалось булево значение (true/false),"
-                             f" получено: {val}.")
-    loaded_data = load_table_data(table_name)
-    new_id = max(loaded_data.keys(), default=0) + 1
-    loaded_data[new_id] = {col: val for col, val in zip(
-        (k for k in metadata[table_name].keys() if k != "ID"), values)}
-    save_table_data(table_name, loaded_data)
-    print(f"Запись успешно добавлена с ID {new_id}.")
+
+    table_data = load_table_data(table_name)
+    if table_data is None:
+        table_data = []
+
+    if table_data:
+        new_id = max(int(row.get("ID", 0)) for row in table_data) + 1
+    else:
+        new_id = 1
+
+    record = {"ID": new_id}
+
+    for (col_name, col_type), raw in zip(columns, values):
+        if col_type == "int":
+            try:
+                record[col_name] = int(raw)
+            except ValueError:
+                raise ValueError(f"Некорректное значение: {raw}. Ожидалось int.")
+        elif col_type == "bool":
+            low = raw.strip().lower()
+            if low == "true":
+                record[col_name] = True
+            elif low == "false":
+                record[col_name] = False
+            else:
+                raise ValueError(
+                    f"Некорректное значение: {raw}. Ожидалось bool (true/false)."
+                )
+        elif col_type == "str":
+            record[col_name] = raw
+        else:
+            raise ValueError(f"Недопустимый тип столбца: {col_type}.")
+
+    table_data.append(record)
+    return table_data
+
+    
 
 def select(table_data, where_clause=None):
     results = []
-    for record_id, record in table_data.items():
-        if where_clause is None or all(record.get(col) == val for col, val 
-                                       in where_clause.items()):
-            results.append((record_id, record))
+    for row in table_data:
+        if where_clause is None or all(row.get(col) == val for col, val in 
+                                       where_clause.items()):
+            results.append(row)
     return results
 
-def update(table_data, set_clause, where_clause=None):
+def update(table_data, set_clause, where_clause):
     updated_count = 0
-    for record_id, record in table_data.items():
-        if where_clause is None or all(record.get(col) == val for col, val 
-                                       in where_clause.items()):
+    for row in table_data:
+        if where_clause is None or all(row.get(col) == val for col, val in 
+                                       where_clause.items()):
             for col, val in set_clause.items():
-                record[col] = val
+                row[col] = val
             updated_count += 1
     return updated_count
 
 def delete(table_data, where_clause):
-    to_delete = [record_id for record_id, record in table_data.items()
-                 if where_clause is None or all(record.get(col) == val 
-                                               for col, val in where_clause.items())]
-    for record_id in to_delete:
-        del table_data[record_id]
-    return len(to_delete)
+    if where_clause is None:
+        raise ValueError("Некорректное значение: условие where обязательно для delete.")
+
+    new_data: list[dict] = []
+    deleted_count = 0
+
+    for row in table_data:
+        if all(row.get(col) == val for col, val in where_clause.items()):
+            deleted_count += 1
+        else:
+            new_data.append(row)
+
+    return new_data, deleted_count

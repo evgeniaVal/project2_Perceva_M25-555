@@ -1,4 +1,7 @@
 import json
+import os
+
+from .consts import DATA_FOLDER
 
 
 def load_metadata(filepath: str) -> dict:
@@ -14,7 +17,7 @@ def load_metadata(filepath: str) -> dict:
         with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
         return data
-    except FileNotFoundError:
+    except (FileNotFoundError, json.JSONDecodeError):
         return {}
 
 def save_metadata(filepath: str, data: dict) -> None:
@@ -34,14 +37,14 @@ def load_table_data(table_name):
         filepath (str): Путь к json файлу с данными таблицы.
 
     Returns:
-        dict: Данные в виде словаря. В случае ошибки возвращается пустой словарь.
+        list: Данные в виде списка. В случае ошибки возвращается пустой список.
     """
     try:
         with open(f'data/{table_name}.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
         return data
-    except FileNotFoundError:
-        return {}
+    except (FileNotFoundError, json.JSONDecodeError):
+        return []
 
 def save_table_data(table_name, data):
     """Сохраняет данные таблицы в json файл.
@@ -50,5 +53,6 @@ def save_table_data(table_name, data):
         filepath (str): Путь к json файлу для сохранения данных таблицы.
         data (dict): Данные в виде словаря для сохранения.
     """
-    with open(f'data/{table_name}.json', 'w', encoding='utf-8') as f:
+    os.makedirs(DATA_FOLDER, exist_ok=True)
+    with open(f'{DATA_FOLDER}/{table_name}.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
