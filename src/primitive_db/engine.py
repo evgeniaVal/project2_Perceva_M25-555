@@ -4,8 +4,47 @@ import prompt
 
 from .consts import META_LOCATION
 from .core import create_table, drop_table, list_tables
-from .utils import check_tokens, load_metadata, save_metadata
+from .parser import get_input, parse_pairs
+from .utils import load_metadata, save_metadata
 
+
+def handle_command(cmd, args, metadata):
+    app_over = False
+    sucess_ = False
+    try:
+        match cmd:
+            case "create_table":
+                if len(args) < 2:
+                    raise ValueError("Недостаточно аргументов для создания таблицы."
+                                     " Требуется имя таблицы и хотя бы один столбец."
+                                     " Попробуйте снова.")
+                invalid = parse_pairs(args[1:])
+                if invalid:
+                    raise ValueError(f"Некорректное значение: {invalid}." 
+                                     " Попробуйте снова.")
+                metadata = create_table(metadata, args[0], 
+                    dict(arg.split(":") for arg in args[1:]))
+                sucess_ = True
+            case "list_tables":
+                if args:
+                    raise ValueError(f"Некорректное значение: {" ".join(args)}." 
+                                     " Попробуйте снова.")
+                list_tables(metadata)
+            case "drop_table":
+                if len(args) != 1:
+                    raise ValueError("Некорректное значение. Требуется указать одно"
+                                     " имя таблицы. Попробуйте снова.")
+                metadata = drop_table(metadata, args[0])
+                sucess_ = True
+            case "exit":
+                app_over = True
+            case "help":
+                print_help()
+            case _:
+                print(f"Функции {cmd} нет. Попробуйте снова.")
+    except (ValueError,) as e:
+        print(e)
+    return app_over, metadata, sucess_
 
 def run():
     print("***База данных***\n")
@@ -15,49 +54,11 @@ def run():
         save_metadata(META_LOCATION, {})
     while not app_over:
         metadata = load_metadata(META_LOCATION)
-        try:
-            input_str = prompt.string(">>>Введите команду: ").strip().lower() # type: ignore
-            args = shlex.split(input_str)
-            if not args:
-                continue
-        except (KeyboardInterrupt, EOFError):
-            args = ["exit"]
-        match args[0]:
-            case "create_table":
-                if len(args) < 3:
-                    print("Недостаточно аргументов. Попробуйте снова.")
-                    continue
-                invalid = check_tokens(args[2:], 
-                                       lambda x: x.count(":") == 1 and 
-                                       all(i_part for i_part in x.split(":")))
-                if invalid:
-                    print(f"Некорректное значение: {invalid}. Попробуйте снова.")
-                    continue
-                try:
-                    save_metadata(META_LOCATION, create_table(metadata, args[1], 
-                                dict(arg.split(":") for arg in args[2:])))
-                except (ValueError,) as e:
-                    print(f"{e}")
-            case "list_tables":
-                list_tables(metadata)
-            case "drop_table":
-                if len(args) < 2:
-                    print("Недостаточно аргументов. Попробуйте снова.")
-                    continue
-                elif len(args) > 2:
-                    print(f"Некорректное значение: {' '.join(args[2:])}." 
-                          "Попробуйте снова.")
-                    continue
-                try:
-                    save_metadata(META_LOCATION, drop_table(metadata, *args[1:]))
-                except (ValueError,) as e:
-                    print(f"{e}")
-            case "exit":
-                app_over = True
-            case "help":
-                print_help()
-            case _:
-                print(f"Функции {args[0]} нет. Попробуйте снова.")
+        cmd, args = get_input()
+        app_over, metadata, sucess_ = handle_command(cmd, args, metadata)
+        if sucess_:
+            save_metadata(META_LOCATION, metadata)
+        
 
 # src/primitive_db/engine.py
 def print_help():

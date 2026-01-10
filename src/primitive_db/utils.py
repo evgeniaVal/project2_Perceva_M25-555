@@ -27,12 +27,6 @@ def save_metadata(filepath: str, data: dict) -> None:
     with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)
 
-def check_tokens(tokens: list, func):
-    for token in tokens:
-        if not func(token):
-            return token
-    return ""
-
 def load_table_data(table_name):
     """Загружает данные таблицы из json.
 
