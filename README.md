@@ -54,3 +54,5 @@ $ database
 >>>Введите команду: exit
 ```
 В случае ввода неизвестной команды или некорректных аргументов программа выводит сообщение об ошибке и повторно запрашивает ввод команды.
+
+[![asciinema](https://asciinema.org/a/Bcu9Fb66hxouYRI8.svg)](https://asciinema.org/a/Bcu9Fb66hxouYRI8)
