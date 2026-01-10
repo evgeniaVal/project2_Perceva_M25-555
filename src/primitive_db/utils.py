@@ -32,3 +32,29 @@ def check_tokens(tokens: list, func):
         if not func(token):
             return token
     return ""
+
+def load_table_data(table_name):
+    """Загружает данные таблицы из json.
+
+    Args:
+        filepath (str): Путь к json файлу с данными таблицы.
+
+    Returns:
+        dict: Данные в виде словаря. В случае ошибки возвращается пустой словарь.
+    """
+    try:
+        with open(f'data/{table_name}.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return data
+    except FileNotFoundError:
+        return {}
+
+def save_table_data(table_name, data):
+    """Сохраняет данные таблицы в json файл.
+
+    Args:
+        filepath (str): Путь к json файлу для сохранения данных таблицы.
+        data (dict): Данные в виде словаря для сохранения.
+    """
+    with open(f'data/{table_name}.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4)
