@@ -2,6 +2,7 @@ import shlex
 
 import prompt
 
+from .consts import META_LOCATION
 from .core import create_table, drop_table, list_tables
 from .utils import check_tokens, load_metadata, save_metadata
 
@@ -10,10 +11,10 @@ def run():
     print("***База данных***\n")
     print_help()
     app_over = False
-    if not load_metadata("db_meta.json"):
-        save_metadata("db_meta.json", {})
+    if not load_metadata(META_LOCATION):
+        save_metadata(META_LOCATION, {})
     while not app_over:
-        metadata = load_metadata("db_meta.json")
+        metadata = load_metadata(META_LOCATION)
         try:
             input_str = prompt.string(">>>Введите команду: ").strip().lower() # type: ignore
             args = shlex.split(input_str)
@@ -33,7 +34,7 @@ def run():
                     print(f"Некорректное значение: {invalid}. Попробуйте снова.")
                     continue
                 try:
-                    save_metadata("db_meta.json", create_table(metadata, args[1], 
+                    save_metadata(META_LOCATION, create_table(metadata, args[1], 
                                 dict(arg.split(":") for arg in args[2:])))
                 except (ValueError,) as e:
                     print(f"{e}")
@@ -48,7 +49,7 @@ def run():
                           "Попробуйте снова.")
                     continue
                 try:
-                    save_metadata("db_meta.json", drop_table(metadata, *args[1:]))
+                    save_metadata(META_LOCATION, drop_table(metadata, *args[1:]))
                 except (ValueError,) as e:
                     print(f"{e}")
             case "exit":
