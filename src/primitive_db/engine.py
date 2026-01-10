@@ -3,7 +3,7 @@ import shlex
 import prompt
 
 from .core import create_table, drop_table, list_tables
-from .utils import load_metadata, save_metadata
+from .utils import check_tokens, load_metadata, save_metadata
 
 
 def run():
@@ -15,21 +15,27 @@ def run():
     while not app_over:
         metadata = load_metadata("db_meta.json")
         try:
-            input_str = prompt.string(">>>Введите команду: ").strip() # type: ignore
+            input_str = prompt.string(">>>Введите команду: ").strip().lower() # type: ignore
             args = shlex.split(input_str)
             if not args:
                 continue
         except (KeyboardInterrupt, EOFError):
             args = ["exit"]
-        match args[0].lower():
+        match args[0]:
             case "create_table":
                 if len(args) < 3:
                     print("Недостаточно аргументов. Попробуйте снова.")
                     continue
+                invalid = check_tokens(args[2:], 
+                                       lambda x: x.count(":") == 1 and 
+                                       all(i_part for i_part in x.split(":")))
+                if invalid:
+                    print(f"Некорректное значение: {invalid}. Попробуйте снова.")
+                    continue
                 try:
                     save_metadata("db_meta.json", create_table(metadata, args[1], 
                                 dict(arg.split(":") for arg in args[2:])))
-                except (ValueError,TypeError) as e:
+                except (ValueError,) as e:
                     print(f"{e}")
             case "list_tables":
                 list_tables(metadata)
@@ -37,9 +43,13 @@ def run():
                 if len(args) < 2:
                     print("Недостаточно аргументов. Попробуйте снова.")
                     continue
+                elif len(args) > 2:
+                    print(f"Некорректное значение: {' '.join(args[2:])}." 
+                          "Попробуйте снова.")
+                    continue
                 try:
                     save_metadata("db_meta.json", drop_table(metadata, *args[1:]))
-                except (ValueError, TypeError) as e:
+                except (ValueError,) as e:
                     print(f"{e}")
             case "exit":
                 app_over = True
