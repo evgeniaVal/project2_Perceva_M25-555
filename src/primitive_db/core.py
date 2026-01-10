@@ -87,3 +87,21 @@ def select(table_data, where_clause=None):
                                        in where_clause.items()):
             results.append((record_id, record))
     return results
+
+def update(table_data, set_clause, where_clause=None):
+    updated_count = 0
+    for record_id, record in table_data.items():
+        if where_clause is None or all(record.get(col) == val for col, val 
+                                       in where_clause.items()):
+            for col, val in set_clause.items():
+                record[col] = val
+            updated_count += 1
+    return updated_count
+
+def delete(table_data, where_clause):
+    to_delete = [record_id for record_id, record in table_data.items()
+                 if where_clause is None or all(record.get(col) == val 
+                                               for col, val in where_clause.items())]
+    for record_id in to_delete:
+        del table_data[record_id]
+    return len(to_delete)
