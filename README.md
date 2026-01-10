@@ -43,7 +43,7 @@ $ database
 Таблица "users" уже существует.
 
 >>>Введите команду: list_tables
-- test
+- users
 
 >>>Введите команду: drop_table users
 Таблица "users" успешно удалена.
