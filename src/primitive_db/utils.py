@@ -11,7 +11,7 @@ def load_metadata(filepath: str) -> dict:
         dict: Метаданные в виде словаря. В случае ошибки возвращается пустой словарь.
     """
     try:
-        with open(filepath) as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             data = json.load(f)
         return data
     except FileNotFoundError:
@@ -24,5 +24,5 @@ def save_metadata(filepath: str, data: dict) -> None:
         filepath (str): Путь к json файлу для сохранения метаданных.
         data (dict): Метаданные в виде словаря для сохранения.
     """
-    with open(filepath, 'w') as f:
+    with open(filepath, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=4)

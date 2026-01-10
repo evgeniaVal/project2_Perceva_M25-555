@@ -14,7 +14,11 @@ def create_table(metadata: dict, table_name: str, columns: dict) -> dict:
     Returns:
         dict: Обновленные метаданные с добавленной таблицей.
     """
-    if 'ID' in columns:
+    if not isinstance(table_name, str):
+        raise TypeError(f"Некорректное значение: {table_name}. Попробуйте снова")
+    if not isinstance(columns, dict):
+        raise TypeError(f"Некорректное значение: {columns}. Попробуйте снова")
+    if 'id' in {x.lower() for x in columns}:
         raise ValueError("Столбец с именем 'ID' зарезервирован и " \
         "добавляется автоматически.")
     if table_name in metadata:
@@ -39,6 +43,8 @@ def drop_table(metadata: dict, table_name: str) -> dict:
     Returns:
         dict: Обновленные метаданные без удаленной таблицы.
     """
+    if not isinstance(table_name, str):
+        raise TypeError("Имя таблицы должно быть строкой.")
     if table_name not in metadata:
         raise ValueError(f'Таблица "{table_name}" не существует.')
     print(f'Таблица "{table_name}" успешно удалена.')
@@ -53,3 +59,5 @@ def list_tables(metadata: dict) -> None:
     if metadata:
         for table_name in metadata.keys():
             print(f"- {table_name}")
+    else:
+        print("Таблиц нет.")

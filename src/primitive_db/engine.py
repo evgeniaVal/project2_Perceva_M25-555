@@ -23,18 +23,24 @@ def run():
             args = ["exit"]
         match args[0].lower():
             case "create_table":
+                if len(args) < 3:
+                    print("Недостаточно аргументов. Попробуйте снова.")
+                    continue
                 try:
                     save_metadata("db_meta.json", create_table(metadata, args[1], 
                                 dict(arg.split(":") for arg in args[2:])))
-                except (ValueError,) as e:
-                    print(f"Ошибка: {e}")
+                except (ValueError,TypeError) as e:
+                    print(f"{e}")
             case "list_tables":
                 list_tables(metadata)
             case "drop_table":
+                if len(args) < 2:
+                    print("Недостаточно аргументов. Попробуйте снова.")
+                    continue
                 try:
                     save_metadata("db_meta.json", drop_table(metadata, *args[1:]))
-                except ValueError as e:
-                    print(f"Ошибка: {e}")
+                except (ValueError, TypeError) as e:
+                    print(f"{e}")
             case "exit":
                 app_over = True
             case "help":
