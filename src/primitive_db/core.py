@@ -1,6 +1,9 @@
+from src.decorators import handle_db_errors
+
 from .utils import load_table_data
 
 
+@handle_db_errors
 def create_table(metadata: dict, table_name: str, columns: dict) -> dict:
     """Создает новую таблицу в метаданных.
 
@@ -30,6 +33,7 @@ def create_table(metadata: dict, table_name: str, columns: dict) -> dict:
     print(f'Таблица "{table_name}" успешно создана со столбцами: {cols_str}.')
     return metadata_tmp
 
+@handle_db_errors
 def drop_table(metadata: dict, table_name: str) -> dict:
     """Удаляет таблицу из метаданных.
 
@@ -43,7 +47,7 @@ def drop_table(metadata: dict, table_name: str) -> dict:
         dict: Обновленные метаданные без удаленной таблицы.
     """
     if table_name not in metadata:
-        raise ValueError(f'Таблица "{table_name}" не существует.')
+        raise KeyError(table_name)
     print(f'Таблица "{table_name}" успешно удалена.')
     return {k: v for k, v in metadata.items() if k != table_name}
     
@@ -59,9 +63,16 @@ def list_tables(metadata: dict) -> None:
     else:
         print("Таблиц нет.")
 
+@handle_db_errors
 def insert(metadata, table_name, values):
     if table_name not in metadata:
-        raise ValueError(f'Таблица "{table_name}" не существует.')
+        raise KeyError(table_name)
+    
+    cleaned = []
+    for x in values:
+        x = x.replace("(", "").replace(")", "").replace(",", "").strip()
+        cleaned.append(x)
+    values = cleaned
 
     schema = metadata[table_name]
 
@@ -71,9 +82,6 @@ def insert(metadata, table_name, values):
         raise ValueError("Количество значений не соответствует количеству столбцов.")
 
     table_data = load_table_data(table_name)
-    if table_data is None:
-        table_data = []
-
     if table_data:
         new_id = max(int(row.get("ID", 0)) for row in table_data) + 1
     else:
@@ -111,15 +119,18 @@ def insert(metadata, table_name, values):
 def select(table_data, where_clause=None):
     results = []
     for row in table_data:
-        if where_clause is None or all(row.get(col) == val for col, val in 
+        if not where_clause or all(row.get(col) == val for col, val in 
                                        where_clause.items()):
             results.append(row)
     return results
 
+@handle_db_errors
 def update(table_data, set_clause, where_clause):
     updated_ids = []
+    if not set_clause:
+        raise ValueError("Условие set обязательно для update.")
     for row in table_data:
-        if where_clause is None or all(row.get(col) == val for col, val in 
+        if not where_clause or all(row.get(col) == val for col, val in 
                                        where_clause.items()):
             for col, val in set_clause.items():
                 row[col] = val
@@ -128,9 +139,10 @@ def update(table_data, set_clause, where_clause):
            " обновлено.")
     return table_data
 
+@handle_db_errors
 def delete(table_data, where_clause):
-    if where_clause is None:
-        raise ValueError("Некорректное значение: условие where обязательно для delete.")
+    if not where_clause:
+        raise ValueError("Условие where обязательно для delete.")
 
     new_data: list[dict] = []
     deleted_ids = []
@@ -144,8 +156,10 @@ def delete(table_data, where_clause):
           " успешно удалено.")
     return new_data
 
+@handle_db_errors
 def info(metadata, table_name):
-    load_table_data(table_name)
+    if table_name not in metadata:
+        raise KeyError(table_name)
     print(f'Таблица: {table_name}')
     print(f"Столбцы: {', '.join(f'{col}:{typ}' for col, typ in 
                                 metadata[table_name].items())}")
