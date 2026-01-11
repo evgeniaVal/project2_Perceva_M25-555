@@ -1,4 +1,4 @@
-from src.decorators import handle_db_errors
+from src.decorators import confirm_action, handle_db_errors, log_time
 
 from .utils import load_table_data
 
@@ -34,6 +34,7 @@ def create_table(metadata: dict, table_name: str, columns: dict) -> dict:
     return metadata_tmp
 
 @handle_db_errors
+@confirm_action("удаление таблицы")
 def drop_table(metadata: dict, table_name: str) -> dict:
     """Удаляет таблицу из метаданных.
 
@@ -64,6 +65,7 @@ def list_tables(metadata: dict) -> None:
         print("Таблиц нет.")
 
 @handle_db_errors
+@log_time
 def insert(metadata, table_name, values):
     """Вставляет новую запись в таблицу.
 
@@ -130,7 +132,7 @@ def insert(metadata, table_name, values):
     return table_data
 
     
-
+@log_time
 def select(table_data, where_clause=None):
     """Выбирает записи из таблицы по условию.
 
@@ -149,6 +151,7 @@ def select(table_data, where_clause=None):
     return results
 
 @handle_db_errors
+@log_time
 def update(table_data, set_clause, where_clause):
     """Обновляет записи в таблице по условию.
 
@@ -177,6 +180,8 @@ def update(table_data, set_clause, where_clause):
     return table_data
 
 @handle_db_errors
+@confirm_action("удаление записей")
+@log_time
 def delete(table_data, where_clause):
     """Удаляет записи из таблицы по условию.
 
@@ -206,6 +211,7 @@ def delete(table_data, where_clause):
     return new_data
 
 @handle_db_errors
+@log_time
 def info(metadata, table_name):
     """Выводит информацию о таблице.
 

@@ -1,4 +1,5 @@
 from functools import wraps
+from time import time
 
 
 def handle_db_errors(func):
@@ -27,4 +28,55 @@ def handle_db_errors(func):
             print(f"Ошибка валидации: {e}")
         except Exception as e:
             print(f"Произошла непредвиденная ошибка: {e}")
+    return wrapper
+
+
+def confirm_action(action_name):
+    """Декоратор для запроса подтверждения перед выполнением действия.
+
+    Перед выполнением декорированной функции запрашивает подтверждение
+    у пользователя. Если пользователь не подтверждает действие (не вводит 'y'),
+    функция не выполняется.
+
+    Args:
+        action_name (str): Название действия для отображения в запросе подтверждения.
+
+    Returns:
+        function: Декоратор для функции.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            answer = input(
+                f'Вы уверены, что хотите выполнить "{action_name}"? [y/n]: '
+            ).strip().lower()
+
+            if answer != "y":
+                print("Операция отменена.")
+                return None
+
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+def log_time(func):
+    """Декоратор для логирования времени выполнения функции.
+
+    Args:
+        func: Декорируемая функция.
+
+    Returns:
+        Обёрнутая функция с логированием времени выполнения.
+    """
+    
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time()
+        result = func(*args, **kwargs)
+        end_time = time()
+        elapsed_time = end_time - start_time
+        print(f"Время выполнения {func.__name__}: {elapsed_time:.4f} секунд")
+        return result
     return wrapper
