@@ -186,7 +186,8 @@ def handle_command(cmd: str, args: list[str], metadata: dict):
             schema = metadata[table_name]  # dict: {col: "int"/"str"/"bool"}
             for col, val in set_clause.items():
                 if col not in schema:
-                    print(f"Ошибка: столбец '{col}' не найден в таблице '{table_name}'.")
+                    print(f"Ошибка: столбец '{col}' не найден в таблице"
+                          " '{table_name}'.")
                     return app_over, metadata, is_successful
                 if col == "ID":
                     print("Ошибка: столбец 'ID' нельзя изменять.")
