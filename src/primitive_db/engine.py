@@ -127,6 +127,7 @@ def handle_command(cmd: str, args: list[str], metadata: dict):
             if new_meta is not None:
                 metadata = new_meta
                 is_successful = True
+                cache_result.clear() # type: ignore
         case "insert":
             if len(args) < 4 or args[0].lower() != "into" or \
              args[2].lower() != "values":

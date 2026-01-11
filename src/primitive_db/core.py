@@ -150,6 +150,7 @@ def select(table_data, where_clause=None):
             results.append(row)
     return results
 
+@handle_db_errors
 @log_time
 def select_query(table_name, where_clause):
     table_data = load_table_data(table_name)

@@ -82,6 +82,11 @@ def log_time(func):
     return wrapper
 
 def create_cacher():
+    """Ке
+
+    Returns:
+        _type_: _description_
+    """
     cache= {}
 
     def cache_result(key, value_func):
