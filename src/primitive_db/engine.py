@@ -44,7 +44,7 @@ def print_rows_pretty(table_name: str, rows: list[dict], metadata: dict) -> None
     schema = metadata.get(table_name, {})
     columns = ["ID"] + [c for c in schema.keys() if c != "ID"]
     if columns == ["ID"] and "ID" not in rows[0]:
-        columns = list(rows[0].keys())
+        columns = list(rows[0].keys() if rows else [])
     t = PrettyTable()
     t.field_names = columns
     for r in rows:
