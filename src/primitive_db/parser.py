@@ -17,13 +17,14 @@ def parse_pairs(pairs):
         
     return invalid
 
-def parse_clause(clause_str: list[str]) -> dict[str, str | int | bool]:
+def parse_clause(clause_str: str) -> dict[str, str | int | bool]:
     result = {}
     if not clause_str:
         return result
-    for i in clause_str:
-        i = i.strip()
-        i = re.sub(r"\s*=\s*", "=", i)
+    clause_str = clause_str.strip()
+    clause_str = re.sub(r"\s*=\s*", "=", clause_str)
+    for i in clause_str.split(" "):
+
         if "=" not in i:
             raise ValueError(f"Некорректное значение: {i}. Ожидалось"
                              " 'столбец=значение'.")
@@ -39,8 +40,7 @@ def parse_clause(clause_str: list[str]) -> dict[str, str | int | bool]:
             try:
                 result[col] = int(val)
             except ValueError:
-                raise ValueError(f"Некорректное значение: {val}. Ожидалось"
-                                 " str (в кавычках), int или bool (true/false).")
+                result[col] = val
     return result
 
     

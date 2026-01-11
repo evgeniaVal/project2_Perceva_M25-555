@@ -98,11 +98,12 @@ def insert(metadata, table_name, values):
                     f"Некорректное значение: {raw}. Ожидалось bool (true/false)."
                 )
         elif col_type == "str":
-            record[col_name] = raw
+            record[col_name] = raw.replace('""', '').replace("''", "")
         else:
             raise ValueError(f"Недопустимый тип столбца: {col_type}.")
 
     table_data.append(record)
+    print(f'Запись с ID={record["ID"]} успешно добавлена в таблицу "{table_name}".')
     return table_data
 
     
@@ -116,26 +117,36 @@ def select(table_data, where_clause=None):
     return results
 
 def update(table_data, set_clause, where_clause):
-    updated_count = 0
+    updated_ids = []
     for row in table_data:
         if where_clause is None or all(row.get(col) == val for col, val in 
                                        where_clause.items()):
             for col, val in set_clause.items():
                 row[col] = val
-            updated_count += 1
-    return updated_count
+            updated_ids.append(row.get("ID"))
+    print(f"{len(updated_ids)} записей с ID: {', '.join(map(str, updated_ids))} успешно"
+           " обновлено.")
+    return table_data
 
 def delete(table_data, where_clause):
     if where_clause is None:
         raise ValueError("Некорректное значение: условие where обязательно для delete.")
 
     new_data: list[dict] = []
-    deleted_count = 0
+    deleted_ids = []
 
     for row in table_data:
         if all(row.get(col) == val for col, val in where_clause.items()):
-            deleted_count += 1
+            deleted_ids.append(row.get("ID"))
         else:
             new_data.append(row)
+    print(f"{len(deleted_ids)} записей с ID: {', '.join(map(str, deleted_ids))}"
+          " успешно удалено.")
+    return new_data
 
-    return new_data, deleted_count
+def info(metadata, table_name):
+    load_table_data(table_name)
+    print(f'Таблица: {table_name}')
+    print(f"Столбцы: {', '.join(f'{col}:{typ}' for col, typ in 
+                                metadata[table_name].items())}")
+    print(f"Количество записей: {len(load_table_data(table_name))}")
