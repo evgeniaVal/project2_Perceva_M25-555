@@ -43,6 +43,13 @@ def print_help():
     print("<command> help - справочная информация\n")
 
 def print_rows_pretty(table_name: str, rows: list[dict], metadata: dict) -> None:
+    """Выводит записи таблицы в форматированном виде.
+
+    Args:
+        table_name (str): Имя таблицы.
+        rows (list[dict]): Список записей для вывода.
+        metadata (dict): Метаданные всех таблиц.
+    """
     schema = metadata.get(table_name, {})
     columns = ["ID"] + [c for c in schema.keys() if c != "ID"]
     if columns == ["ID"] and "ID" not in rows[0]:
@@ -55,9 +62,30 @@ def print_rows_pretty(table_name: str, rows: list[dict], metadata: dict) -> None
 
 @handle_db_errors
 def parse_clause_safe(clause_str: str) -> dict:
+    """Безопасно парсит строку условия с обработкой ошибок.
+
+    Args:
+        clause_str (str): Строка с условием для парсинга.
+
+    Returns:
+        dict: Словарь с разобранным условием.
+    """
     return parse_clause(clause_str)
 
 def handle_command(cmd: str, args: list[str], metadata: dict):
+    """Обрабатывает команду пользователя.
+
+    Args:
+        cmd (str): Название команды.
+        args (list[str]): Аргументы команды.
+        metadata (dict): Метаданные всех таблиц.
+
+    Returns:
+        tuple: Кортеж из трех элементов:
+            - app_over (bool): Флаг завершения работы приложения.
+            - metadata (dict): Обновленные метаданные.
+            - is_successful (bool): Флаг успешного выполнения команды.
+    """
     app_over = False
     is_successful = False
     match cmd:
@@ -186,6 +214,14 @@ def handle_command(cmd: str, args: list[str], metadata: dict):
     return app_over, metadata, is_successful
 
 def get_input(prompt_msg=">>>Введите команду: "):
+    """Получает и парсит ввод пользователя.
+
+    Args:
+        prompt_msg (str): Сообщение для приглашения к вводу.
+
+    Returns:
+        tuple: Кортеж из команды и списка аргументов.
+    """
     try:
         input_str = prompt.string(prompt_msg).strip() # type: ignore
         cmd, args = parse_command(input_str)
@@ -194,6 +230,7 @@ def get_input(prompt_msg=">>>Введите команду: "):
     return cmd.lower(), args
 
 def run():
+    """Запускает основной цикл работы базы данных."""
     print("***База данных***\n")
     print_help()
     app_over = False

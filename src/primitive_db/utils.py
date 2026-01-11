@@ -34,7 +34,7 @@ def load_table_data(table_name):
     """Загружает данные таблицы из json.
 
     Args:
-        filepath (str): Путь к json файлу с данными таблицы.
+        table_name (str): Имя таблицы для загрузки данных.
 
     Returns:
         list: Данные в виде списка. В случае ошибки возвращается пустой список.
@@ -50,8 +50,8 @@ def save_table_data(table_name, data):
     """Сохраняет данные таблицы в json файл.
 
     Args:
-        filepath (str): Путь к json файлу для сохранения данных таблицы.
-        data (dict): Данные в виде словаря для сохранения.
+        table_name (str): Имя таблицы для сохранения данных.
+        data (list): Данные в виде списка для сохранения.
     """
     os.makedirs(DATA_FOLDER, exist_ok=True)
     with open(f'{DATA_FOLDER}/{table_name}.json', 'w', encoding='utf-8') as f:

@@ -65,6 +65,21 @@ def list_tables(metadata: dict) -> None:
 
 @handle_db_errors
 def insert(metadata, table_name, values):
+    """Вставляет новую запись в таблицу.
+
+    Args:
+        metadata (dict): Метаданные всех таблиц.
+        table_name (str): Имя таблицы для вставки данных.
+        values (list): Список значений для вставки.
+
+    Raises:
+        KeyError: Если таблица не существует.
+        ValueError: Если количество значений не соответствует количеству столбцов.
+        ValueError: Если тип значения не соответствует типу столбца.
+
+    Returns:
+        list: Обновленные данные таблицы с добавленной записью.
+    """
     if table_name not in metadata:
         raise KeyError(table_name)
     
@@ -117,6 +132,15 @@ def insert(metadata, table_name, values):
     
 
 def select(table_data, where_clause=None):
+    """Выбирает записи из таблицы по условию.
+
+    Args:
+        table_data (list): Данные таблицы.
+        where_clause (dict, optional): Условия фильтрации (столбец: значение).
+
+    Returns:
+        list: Список записей, соответствующих условию.
+    """
     results = []
     for row in table_data:
         if not where_clause or all(row.get(col) == val for col, val in 
@@ -126,6 +150,19 @@ def select(table_data, where_clause=None):
 
 @handle_db_errors
 def update(table_data, set_clause, where_clause):
+    """Обновляет записи в таблице по условию.
+
+    Args:
+        table_data (list): Данные таблицы.
+        set_clause (dict): Словарь с обновляемыми столбцами и значениями.
+        where_clause (dict): Условия для выбора записей для обновления.
+
+    Raises:
+        ValueError: Если не указано условие set.
+
+    Returns:
+        list: Обновленные данные таблицы.
+    """
     updated_ids = []
     if not set_clause:
         raise ValueError("Условие set обязательно для update.")
@@ -141,6 +178,18 @@ def update(table_data, set_clause, where_clause):
 
 @handle_db_errors
 def delete(table_data, where_clause):
+    """Удаляет записи из таблицы по условию.
+
+    Args:
+        table_data (list): Данные таблицы.
+        where_clause (dict): Условия для выбора записей для удаления.
+
+    Raises:
+        ValueError: Если не указано условие where.
+
+    Returns:
+        list: Данные таблицы без удаленных записей.
+    """
     if not where_clause:
         raise ValueError("Условие where обязательно для delete.")
 
@@ -158,6 +207,15 @@ def delete(table_data, where_clause):
 
 @handle_db_errors
 def info(metadata, table_name):
+    """Выводит информацию о таблице.
+
+    Args:
+        metadata (dict): Метаданные всех таблиц.
+        table_name (str): Имя таблицы для получения информации.
+
+    Raises:
+        KeyError: Если таблица не существует.
+    """
     if table_name not in metadata:
         raise KeyError(table_name)
     print(f'Таблица: {table_name}')
