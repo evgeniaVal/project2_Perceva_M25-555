@@ -80,3 +80,18 @@ def log_time(func):
         print(f"Время выполнения {func.__name__}: {elapsed_time:.4f} секунд")
         return result
     return wrapper
+
+def create_cacher():
+    cache= {}
+
+    def cache_result(key, value_func):
+        if key in cache:
+            return cache[key]
+        value = value_func()
+        cache[key] = value
+        return value
+    def clear():
+        cache.clear()
+
+    cache_result.clear = clear # type:ignore
+    return cache_result

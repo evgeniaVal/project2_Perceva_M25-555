@@ -132,7 +132,7 @@ def insert(metadata, table_name, values):
     return table_data
 
     
-@log_time
+
 def select(table_data, where_clause=None):
     """Выбирает записи из таблицы по условию.
 
@@ -149,6 +149,13 @@ def select(table_data, where_clause=None):
                                        where_clause.items()):
             results.append(row)
     return results
+
+@log_time
+def select_query(table_name, where_clause):
+    table_data = load_table_data(table_name)
+    where_clause = where_clause or {}
+    return [row for row in table_data if all(row.get(k) == v for k, v in 
+                                             where_clause.items())]
 
 @handle_db_errors
 @log_time

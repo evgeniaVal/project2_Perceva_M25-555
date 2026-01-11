@@ -1,7 +1,7 @@
 import prompt
 from prettytable import PrettyTable
 
-from src.decorators import handle_db_errors
+from src.decorators import create_cacher, handle_db_errors
 
 from .consts import META_LOCATION
 from .core import (
@@ -11,12 +11,18 @@ from .core import (
     info,
     insert,
     list_tables,
-    select,
+    select_query,
     update,
 )
 from .parser import parse_clause, parse_command, parse_pairs
 from .utils import load_metadata, load_table_data, save_metadata, save_table_data
 
+cache_result = create_cacher()
+def make_select_cache_key(table_name, where_clause):
+    if not where_clause:
+        return f"{table_name}|ALL"
+    items = tuple(sorted(where_clause.items(), key=lambda x: x[0]))
+    return f"{table_name}|{items}"
 
 def print_help():
     """Prints the help message for the current mode."""
@@ -130,6 +136,7 @@ def handle_command(cmd: str, args: list[str], metadata: dict):
             new_data = insert(metadata, table_name, args[3:])
             if new_data is not None:
                 save_table_data(table_name, new_data)
+                cache_result.clear() # type: ignore
         case "select":
             if len(args) < 2 or args[0].lower() != "from":
                 print("Некорректный синтаксис команды select. Попробуйте снова.")
@@ -138,9 +145,9 @@ def handle_command(cmd: str, args: list[str], metadata: dict):
             if table_name not in metadata:
                 print(f'Таблица "{table_name}" не существует.')
                 return app_over, metadata, is_successful
-            table_data = load_table_data(table_name)
             if len(args) == 2:
-                rows = select(table_data, {})
+                key = make_select_cache_key(table_name, {})
+                rows = cache_result(key, lambda: select_query(table_name, {}))
                 if not rows:
                     print("Нет записей.")
                 else:
@@ -152,7 +159,8 @@ def handle_command(cmd: str, args: list[str], metadata: dict):
             clause = parse_clause_safe(" ".join(args[3:]))
             if clause is None:
                 return app_over, metadata, is_successful
-            rows = select(table_data, clause)
+            key = make_select_cache_key(table_name, clause)
+            rows = cache_result(key, lambda: select_query(table_name, clause))
             if not rows:
                 print("Нет записей.")
             else:
@@ -178,6 +186,7 @@ def handle_command(cmd: str, args: list[str], metadata: dict):
             new_data = update(table_data, set_clause, where_clause)
             if new_data is not None:
                 save_table_data(table_name, new_data)
+                cache_result.clear() # type: ignore
         case "delete":
             if (
                 len(args) < 4
@@ -196,6 +205,7 @@ def handle_command(cmd: str, args: list[str], metadata: dict):
             new_data = delete(table_data, where_clause)
             if new_data is not None:
                 save_table_data(table_name, new_data)
+                cache_result.clear() # type: ignore
         case "info":
             if len(args) != 1:
                 print(
