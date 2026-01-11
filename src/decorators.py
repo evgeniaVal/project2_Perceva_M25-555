@@ -1,5 +1,5 @@
 from functools import wraps
-from time import time
+from time import monotonic
 
 
 def handle_db_errors(func):
@@ -73,9 +73,9 @@ def log_time(func):
     
     @wraps(func)
     def wrapper(*args, **kwargs):
-        start_time = time()
+        start_time = monotonic()
         result = func(*args, **kwargs)
-        end_time = time()
+        end_time = monotonic()
         elapsed_time = end_time - start_time
         print(f"Время выполнения {func.__name__}: {elapsed_time:.4f} секунд")
         return result

@@ -159,7 +159,6 @@ def select_query(table_name, where_clause):
                                              where_clause.items())]
 
 @handle_db_errors
-@log_time
 def update(table_data, set_clause, where_clause):
     """Обновляет записи в таблице по условию.
 
@@ -189,7 +188,6 @@ def update(table_data, set_clause, where_clause):
 
 @handle_db_errors
 @confirm_action("удаление записей")
-@log_time
 def delete(table_data, where_clause):
     """Удаляет записи из таблицы по условию.
 
@@ -219,7 +217,6 @@ def delete(table_data, where_clause):
     return new_data
 
 @handle_db_errors
-@log_time
 def info(metadata, table_name):
     """Выводит информацию о таблице.
 
