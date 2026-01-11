@@ -123,7 +123,7 @@ def insert(metadata, table_name, values):
                     f"Некорректное значение: {raw}. Ожидалось bool (true/false)."
                 )
         elif col_type == "str":
-            record[col_name] = raw.replace('""', '').replace("''", "")
+            record[col_name] = raw.replace('"', '').replace("'", "")
         else:
             raise ValueError(f"Недопустимый тип столбца: {col_type}.")
 

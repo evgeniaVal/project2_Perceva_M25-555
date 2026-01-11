@@ -40,7 +40,7 @@ def load_table_data(table_name):
         list: Данные в виде списка. В случае ошибки возвращается пустой список.
     """
     try:
-        with open(f'data/{table_name}.json', 'r', encoding='utf-8') as f:
+        with open(f'{DATA_FOLDER}/{table_name}.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
         return data
     except (FileNotFoundError, json.JSONDecodeError):

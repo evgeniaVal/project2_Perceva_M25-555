@@ -183,6 +183,27 @@ def handle_command(cmd: str, args: list[str], metadata: dict):
             where_clause = parse_clause_safe(wheres)
             if set_clause is None or where_clause is None:
                 return app_over, metadata, is_successful
+            schema = metadata[table_name]  # dict: {col: "int"/"str"/"bool"}
+            for col, val in set_clause.items():
+                if col not in schema:
+                    print(f"Ошибка: столбец '{col}' не найден в таблице '{table_name}'.")
+                    return app_over, metadata, is_successful
+                if col == "ID":
+                    print("Ошибка: столбец 'ID' нельзя изменять.")
+                    return app_over, metadata, is_successful
+
+                expected = schema[col]
+                ok = (
+                    (expected == "int" and isinstance(val, int))
+                    or (expected == "bool" and isinstance(val, bool))
+                    or (expected == "str" and isinstance(val, str))
+                )
+                if not ok:
+                    print(
+                        f"Ошибка валидации: столбец '{col}' ожидает {expected}, "
+                        f"получено {type(val).__name__} ({val})."
+                    )
+                    return app_over, metadata, is_successful
             table_data = load_table_data(table_name)
             new_data = update(table_data, set_clause, where_clause)
             if new_data is not None:

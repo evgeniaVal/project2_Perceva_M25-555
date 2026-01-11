@@ -77,16 +77,11 @@ def log_time(func):
         result = func(*args, **kwargs)
         end_time = monotonic()
         elapsed_time = end_time - start_time
-        print(f"Время выполнения {func.__name__}: {elapsed_time:.4f} секунд")
+        print(f"Функция {func.__name__} выполнилась за {elapsed_time:.3f} секунд")
         return result
     return wrapper
 
 def create_cacher():
-    """Ке
-
-    Returns:
-        _type_: _description_
-    """
     cache= {}
 
     def cache_result(key, value_func):
